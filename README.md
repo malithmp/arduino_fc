@@ -5,6 +5,18 @@ Simple flight controller based off arduino. This contains 2 elements.
 2. Flight Controller:
    Combine the 2 singals to control the Ailerons to both roll and lift
 
+
+## Gotchas
+1. You can only attach one interrupt handler function per pin using `attachInterrupt` method. i.e You CANNOT do
+```
+attachInterrupt(digitalPinToInterrupt(2), method_to_handle_rising, RISING);
+attachInterrupt(digitalPinToInterrupt(2), method_to_handle_falling, FALLING);
+```
+in this case the latter will override the former. 
+
+We have to have logic to read the pin state and handle rising and falling cases manually
+
+
 ## PPM Decoding logic
    A   B         C
     ____          __

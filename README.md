@@ -18,6 +18,7 @@ We have to have logic to read the pin state and handle rising and falling cases 
 
 
 ## PPM Decoding logic
+```
    A   B         C
     ____          __
    |    |        |
@@ -25,6 +26,7 @@ We have to have logic to read the pin state and handle rising and falling cases 
 ---     ---------
    <-t->
    <------T----->
+```
 
 T is the pulse width. For the FS-iA6B Receiver, this is 20ms
 t is the pulse period. This changes based on the input

@@ -1,7 +1,17 @@
+#include <Servo.h>
+
 // Interrupt Pin Ids
 const byte INTERRUPT_1 = 2;
 const byte INTERRUPT_2 = 3;
 
+const int ROLL_ANGLE_MAX  =  30;
+const int ROLL_ANGLE_MIN  = -30;
+const int PITCH_ANGLE_MAX =  30;
+const int PITCH_ANGLE_MIN = -30;
+
+Servo servo_left; 
+Servo servo_right;
+ 
 struct Channel {
   volatile unsigned long int pulse_start;
   int pulse_width;
@@ -21,7 +31,9 @@ void setup() {
    
   pinMode(2, INPUT);
   pinMode(3, INPUT);
-  
+
+  servo_left.attach(13);
+  servo_right.attach(12);
   attachInterrupt(digitalPinToInterrupt(2), ch1_ppm_change, CHANGE);
   attachInterrupt(digitalPinToInterrupt(3), ch2_ppm_change, CHANGE);
 
@@ -73,15 +85,28 @@ void print_debug(){
 
 void loop() {
   // put your main code here, to run repeatedly:
-  int ch1_norm = normalized_width(&ch1, -100, 100);
-  int ch2_norm = normalized_width(&ch2, 0   , 100);
-  
-  Serial.println("CH1: " + (String)ch1_norm + "  CH2: " + (String)ch2_norm);
-  
-  //mix_signals();
 
+  
+
+  // mix signales 
+  // CH1 => roll 
+  // CH2 => pitch
+  // We combine the 2 such that
+  // CH1 is added to one side and subtracted from the other (Roll)
+  // CH2 is added to both servos
+  int ch1_norm = normalized_width(&ch1, ROLL_ANGLE_MIN,  ROLL_ANGLE_MAX);
+  int ch2_norm = normalized_width(&ch2, PITCH_ANGLE_MIN, PITCH_ANGLE_MAX);
+
+  
+  int servo_left_angle  = (ROLL_ANGLE_MAX - PITCH_ANGLE_MIN) + (ch1_norm - ch2_norm);
+  int servo_right_angle = (ROLL_ANGLE_MAX - PITCH_ANGLE_MIN) + (ch1_norm + ch2_norm);
+
+  //Serial.println("CH1: " + (String)ch1_norm + "  CH2: " + (String)ch2_norm);
+  Serial.println("SL: " + (String)servo_left_angle + "  SR: " + (String)servo_right_angle);
   // Debug and find channel mins and maxes
   // print_debug();
   
+  servo_left.write( servo_left_angle);
+  servo_right.write( servo_right_angle);
   delay(100);
  }
